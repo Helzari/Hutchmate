@@ -19,6 +19,13 @@ android {
     // Release signing comes from environment variables (set as GitHub secrets). Without them, release builds are unsigned.
     def ksFile = System.getenv("KEYSTORE_FILE")
     signingConfigs {
+        // Fixed debug key kept in the repo so every build can install over the previous one.
+        debug {
+            storeFile file("debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
         if (ksFile) {
             release {
                 storeFile file(ksFile)
