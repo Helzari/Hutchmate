@@ -11,5 +11,9 @@ for(const [fam,pkg,ws] of fonts) for(const w of ws){
 let html=fs.readFileSync('src/index.html','utf8');
 html=html.replace(/<link rel="preconnect"[^>]*>\n?/,'').replace(/<link rel="stylesheet" href="https:\/\/fonts\.googleapis\.com[^>]*>/,`<style>\n${css}</style>`);
 if(html.includes('fonts.googleapis')) throw new Error('font link not replaced');
+// Stamp the build number (set by GitHub Actions) so the app can tell when a newer build exists.
+const build=parseInt(process.env.BUILD_NUMBER||'0',10)||0;
+if(!html.includes('const APP_BUILD = 0; /*__APP_BUILD__*/')) throw new Error('build marker missing');
+html=html.replace('const APP_BUILD = 0; /*__APP_BUILD__*/',`const APP_BUILD = ${build};`);
 fs.writeFileSync(path.join(out,'index.html'),html);
 console.log('www/ built');

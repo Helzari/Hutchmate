@@ -26,6 +26,8 @@ jobs:
           java-version: 21
 
       - name: Install and build web app
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
         run: |
           npm ci
           npm run build:web

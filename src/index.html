@@ -397,6 +397,7 @@ a.call.ooh{background:var(--danger)}
     <h2 id="homeHello">Hutchmate</h2>
     <div class="small muted" id="homeSub"></div>
   </div>
+  <div id="updBanner" hidden></div>
   <div class="tiles" id="homeTiles"></div>
   <div class="card">
     <h3>Coming up</h3>
@@ -638,6 +639,7 @@ a.call.ooh{background:var(--danger)}
   <div class="card">
     <h3>Help</h3>
     <div class="setrow"><div><b>User guide</b><div class="small muted">How every part of the app works.</div></div><button class="sm primary" data-goto="guide">Open</button></div>
+    <div class="setrow"><div><b>App version</b><div class="small muted" id="updTxt"></div></div><button class="sm" id="updCheck">Check for updates</button></div>
     <div class="setrow"><div><b>About</b><div class="small muted">Hutchmate · genetics, litters &amp; health for rabbits and guinea pigs. Genetics and health information are a guide only; always check with your vet and breed club.</div></div></div>
   </div>
 </section>
@@ -2727,6 +2729,30 @@ $('#setVet').addEventListener('click',()=>{ go('health'); setTimeout(()=>{ const
 $('#gearBtn').addEventListener('click',()=>{ const cur=(location.hash||'').slice(1); go(cur==='settings'||cur==='guide'?'home':'settings'); });
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-goto]'); if(b) go(b.dataset.goto); });
 
+/* ===================== update check (phone app) ===================== */
+const APP_BUILD = 0; /*__APP_BUILD__*/
+const UPD = {api:'https://api.github.com/repos/Helzari/hutchmate/releases/tags/latest', apk:'https://github.com/Helzari/Hutchmate/releases/download/latest/Hutchmate.apk', latest:null, state:''};
+const isApp = () => APP_BUILD>0;
+function renderUpdate(){
+  const t=$('#updTxt'), b=$('#updBanner'), newer=isApp() && UPD.latest>APP_BUILD;
+  t.textContent = !isApp() ? 'Web version: always the latest.' : newer ? `Build ${APP_BUILD} installed. Build ${UPD.latest} is available.` : UPD.state==='fail' ? `Build ${APP_BUILD}. Couldn’t check for updates; are you online?` : UPD.latest ? `Build ${APP_BUILD}. You’re up to date.` : `Build ${APP_BUILD}.`;
+  $('#updCheck').hidden=!isApp();
+  b.innerHTML=''; b.hidden=!newer;
+  if(newer) b.append(el('div',{class:'note info',style:'display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap'},
+    el('div',{},el('b',{},'Update available. '),`Build ${UPD.latest} is ready (you have ${APP_BUILD}). Your data is kept.`),
+    el('a',{class:'call',href:UPD.apk,target:'_blank',rel:'noopener'},'Download update')));
+}
+async function checkUpdate(manual){
+  if(!isApp()) return;
+  try{ const r=await fetch(UPD.api,{headers:{Accept:'application/vnd.github+json'},cache:'no-store'}); if(!r.ok) throw 0; const j=await r.json();
+    const m=String(j.body||'').match(/Build (\d+)/); if(!m) throw 0; UPD.latest=+m[1]; UPD.state='ok'; Settings.updChecked=Date.now(); saveSettings();
+    if(manual) toast(UPD.latest>APP_BUILD?`Build ${UPD.latest} is available`:'You’re up to date');
+  }catch{ UPD.state='fail'; if(manual) toast('Couldn’t check for updates. Check your connection.'); }
+  renderUpdate();
+}
+$('#updCheck').addEventListener('click',()=>checkUpdate(true));
+renderUpdate(); checkUpdate(false);
+
 /* ===================== home ===================== */
 const ICON = {
  mate:'<path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/>',
@@ -2791,6 +2817,7 @@ const GUIDE = [
  ['Due dates & litters',`<ul><li><b>Due</b>: enter the mating date to see the due date, the normal window and a full timeline from mating to new homes. Add the birth date to switch to the babies’ age.</li><li><b>Litters</b>: log each mating, then tap “Record birth” to add numbers born and alive. Overdue litters turn red.</li><li>Rabbits: 28–35 days (usually 31). Guinea pigs: 59–72 days (usually 63–68).</li></ul>`,[['Log a mating','litters']]],
  ['Health check',`<ol><li>If you see any <b>emergency sign</b>, tap it and ring your vet straight away.</li><li>Otherwise tap the body area and the signs you can see. The most likely causes appear with what to do now and how urgent it is.</li><li><b>Record this check</b> to save it to the animal’s health log, or <b>copy a summary</b> to send or read to your vet.</li><li>Mark checks resolved when they’re better. Routine daily, weekly and yearly checks are at the bottom.</li></ol><p>The checker is a guide to help you act quickly. It is not a diagnosis.</p>`,[['Open Health','health']]],
  ['Settings & display',`<p>Tap the gear at the top. Choose <b>System</b> (follows your phone), <b>Light</b>, <b>Dark</b>, <b>Night</b> (dim and warm for checking hutches in the dark) or <b>High contrast</b>. You can also make the text larger and switch off the litter animation. These settings are saved on each device.</p>`,[['Open settings','settings']]],
+ ['Updating the phone app',`<p>The phone app checks for a newer version each time it opens. If there is one, an <b>Update available</b> banner appears on the Home page: tap <b>Download update</b>, open the downloaded file and install it over the top. Your animals and records are kept. You can also check in <b>Settings → App version</b>.</p>`,[['Open settings','settings']]],
  ['Saving, sharing & backups',`<p>In the web version your records are saved online and shared with anyone you give edit access. In the phone app they’re saved on the phone.</p><p>To move records between them, open <b>Settings → Backup</b>, tap <b>Copy backup</b>, then paste it into the other version and tap <b>Restore</b>. Records already there are kept.</p>`,[['Open backup','backup']]],
  ['Good to know',`<ul><li>Odds are per baby. Real litters vary, especially small ones.</li><li>The genetics cover the main colour, pattern and coat genes. Dutch markings, rufus, wideband shades and some rarer genes aren’t modelled.</li><li>Weights and breeding ages are rough guides; check your breed standard.</li><li>When in doubt about health, ring your vet.</li></ul>`,[]],
 ];
