@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       HAS_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 != '' }}
     steps:
@@ -43,6 +45,16 @@ jobs:
         with:
           name: hutchmate-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Publish APK to the "latest" release (phone-friendly download link)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk Hutchmate.apk
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest Hutchmate.apk --target "${{ github.sha }}" \
+            --title "Hutchmate (latest build)" \
+            --notes "Build ${{ github.run_number }}. On an Android phone, tap Hutchmate.apk below, then open it and allow installing from this source. Installing over an older version keeps your data."
 
       # ---- Optional: signed release for Google Play. Runs only once the KEYSTORE_BASE64 secret exists. ----
       - name: Build signed release (Play Store bundle + APK)
