@@ -205,8 +205,8 @@ details[open] > summary::before{content:"– "}
 .cond li.hit{font-weight:700;color:var(--accent)}
 .toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;font-size:.88rem;z-index:20;max-width:calc(100% - 32px)}
-.seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
-.seg button{border:0;background:transparent;padding:8px;color:var(--muted)}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.seg button{border:0;background:transparent;padding:8px 4px;color:var(--muted);font-size:.86rem;line-height:1.2}
 .seg button[aria-selected="true"]{background:var(--accent);color:var(--on-accent)}
 .cg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 @media (max-width:360px){.cg-grid{grid-template-columns:1fr}}
@@ -305,6 +305,31 @@ a.call.ooh{background:var(--danger)}
 .guide .gbody p{margin:0}
 .backlink{align-self:flex-start}
 
+/* identify */
+.shots{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.shot{position:relative;display:flex;flex-direction:column;gap:6px;align-items:stretch;border:1.5px dashed var(--line);border-radius:12px;padding:8px;background:var(--bg);cursor:pointer;text-align:center;font-weight:400}
+.shot.has{border-style:solid;border-color:var(--leaf)}
+.shot .ph{aspect-ratio:4/3;border-radius:8px;background:var(--surface);display:grid;place-items:center;overflow:hidden}
+.shot .ph img{width:100%;height:100%;object-fit:cover}
+.shot .ph svg{width:46px;height:46px;stroke:var(--muted);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.shot b{font-size:.88rem}
+.shot span{font-size:.74rem;color:var(--muted);line-height:1.25}
+.shot .rm{position:absolute;top:4px;right:4px;width:28px;height:28px;padding:0;border-radius:50%;font-size:.9rem;line-height:1}
+.idq{padding:10px 0;border-top:1px solid var(--line)}
+.idq:first-child{border-top:0}
+.idq .ql{font-weight:600;font-size:.9rem;margin-bottom:6px}
+.idq .qh{font-size:.78rem;color:var(--muted);margin:-3px 0 6px}
+.idres{display:grid;grid-template-columns:56px 1fr auto;gap:4px 12px;align-items:center}
+.idres .sw{width:56px;height:56px;border-radius:50%;border:1px solid var(--line);grid-row:span 2}
+.idres .nm{font-family:var(--display);font-size:1.1rem;line-height:1.2}
+.idres .pc{font-family:var(--mono);font-weight:700;font-size:1.05rem}
+.idres .full{grid-column:1/-1}
+.idres.top{border:2px solid var(--accent)}
+.conf{height:8px;border-radius:5px;background:var(--accent-soft);overflow:hidden}
+.conf i{display:block;height:100%;background:var(--accent)}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-3px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
 /* litter simulation */
 .sim-cta{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 16px;font-size:1rem;border-radius:var(--radius)}
 .sim-cta svg{width:20px;height:20px;fill:currentColor}
@@ -390,6 +415,7 @@ a.call.ooh{background:var(--danger)}
     <button role="tab" id="segCalc" aria-selected="true">Calculator</button>
     <button role="tab" id="segGuide" aria-selected="false">Colour guide</button>
     <button role="tab" id="segWant" aria-selected="false">Breed for</button>
+    <button role="tab" id="segId" aria-selected="false">Identify</button>
   </div>
   <div class="panel" id="colGuide" hidden>
     <div>
@@ -412,9 +438,25 @@ a.call.ooh{background:var(--danger)}
     </div></div>
     <div id="wantOut" class="panel"></div>
   </div>
+  <div class="panel" id="colId" hidden>
+    <div>
+      <h2>Identify a colour</h2>
+      <p class="lede">Add three photos and answer a few quick questions. Hutchmate suggests the most likely colours, each with a confidence score.</p>
+    </div>
+    <div class="card">
+      <h3>1. Photos</h3>
+      <div class="small muted" style="margin-bottom:10px">Daylight near a window, no flash, plain background, dry and brushed coat. Fill the frame with the animal.</div>
+      <div class="shots" id="idShots"></div>
+    </div>
+    <div class="card"><h3>2. Quick questions</h3><div class="small muted" style="margin-bottom:6px">Answers make a big difference: eye colour and ticking can’t always be seen in photos.</div><div id="idQs"></div></div>
+    <button class="primary sim-cta" id="idRun">Analyse colour</button>
+    <div class="small muted" id="idMode" style="text-align:center;margin-top:-6px"></div>
+    <div id="idOut" class="panel"></div>
+    <details class="card" id="idAbout"><summary>How accurate is this?</summary><div class="small" id="idAboutBody" style="margin-top:8px;display:flex;flex-direction:column;gap:8px"></div></details>
+  </div>
   <div class="panel" id="colCalc">
   <div>
-    <h2>Colour &amp; coat calculator</h2>
+    <div class="toolbar"><h2 style="margin:0">Colour &amp; coat calculator</h2><button class="sm ghost" id="calcReset"><svg viewBox="0 0 24 24" width="15" height="15" style="vertical-align:-2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Reset</button></div>
     <p class="lede">Pick each parent's colour, then add any hidden genes you know they carry. The odds below update straight away.</p>
   </div>
   <div class="parents" id="parents"></div>
@@ -641,7 +683,7 @@ a.call.ooh{background:var(--danger)}
 <script>
 /* ===================== helpers ===================== */
 const $ = s => document.querySelector(s);
-const el = (tag, attrs={}, ...kids) => { const e=document.createElement(tag); for(const [k,v] of Object.entries(attrs)){ if(k==='class') e.className=v; else if(k==='html') e.innerHTML=v; else if(k.startsWith('on')) e.addEventListener(k.slice(2),v); else if(v!==undefined && v!==null && v!==false) e.setAttribute(k,v===true?'':v);} for(const k of kids.flat()){ if(k==null||k===false) continue; e.append(k.nodeType?k:document.createTextNode(String(k))); } return e; };
+const el = (tag, attrs={}, ...kids) => { const e=document.createElement(tag); for(const [k,v] of Object.entries(attrs)){ if(k==='class') e.className=v; else if(k==='html') e.innerHTML=v; else if(k.startsWith('on')) e.addEventListener(k.slice(2),v); else if(k.startsWith('aria-') && typeof v==='boolean') e.setAttribute(k,String(v)); else if(v!==undefined && v!==null && v!==false) e.setAttribute(k,v===true?'':v);} for(const k of kids.flat()){ if(k==null||k===false) continue; e.append(k.nodeType?k:document.createTextNode(String(k))); } return e; };
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
 const lc1 = s => s.charAt(0).toLowerCase()+s.slice(1);
@@ -1679,7 +1721,7 @@ function setSpecies(spId, breedId, {keepParents=false}={}){
   $('#breedSel').value=`${SP.id}:${BR.id}`;
   if(changed || !keepParents){ if(changed) resetParents(); else for(const k of ['doe','buck']) for(const l of TRAITS) parents[k].g[l.k]=breedPair(l.k); }
   if(changed){ selSym.clear(); cgGroup='All'; $('#hSearch').value=''; $('#cgSearch').value=''; $('#herdForm').hidden=true; $('#litForm').hidden=true; buildHealthStatic(); }
-  applyTerms(); buildHerdFormStatic(); renderBreedCard();
+  applyTerms(); buildHerdFormStatic(); renderBreedCard(); if(changed||!Idf.built) buildIdStatic();
   renderData(); renderParents(); renderDue(); renderSymChips(); renderHealth(); renderRoutine(); renderCgGroups(); renderGuide(); buildWantStatic(); renderWant();
 }
 function buildBreedSelect(){
@@ -1765,12 +1807,14 @@ function renderResults(){
 }
 
 /* ===================== colour guide ===================== */
-function showColSub(which){ const m={calc:'#colCalc',guide:'#colGuide',want:'#colWant'}, b={calc:'#segCalc',guide:'#segGuide',want:'#segWant'};
+function showColSub(which){ const m={calc:'#colCalc',guide:'#colGuide',want:'#colWant',id:'#colId'}, b={calc:'#segCalc',guide:'#segGuide',want:'#segWant',id:'#segId'};
   for(const k of Object.keys(m)){ $(m[k]).hidden=k!==which; $(b[k]).setAttribute('aria-selected',k===which); }
   if(which==='want') renderWant(); }
 $('#segCalc').addEventListener('click',()=>showColSub('calc'));
 $('#segGuide').addEventListener('click',()=>showColSub('guide'));
 $('#segWant').addEventListener('click',()=>showColSub('want'));
+$('#segId').addEventListener('click',()=>showColSub('id'));
+$('#calcReset').addEventListener('click',()=>{ resetParents(); renderParents(); toast('Calculator reset'); });
 let cgGroup='All';
 function renderCgGroups(){ const box=$('#cgGroups'); box.innerHTML=''; const groups=['All',...new Set(SP.colours.map(c=>c.grp))]; for(const g of groups) box.append(el('button',{class:'chip','aria-pressed':g===cgGroup,onclick:()=>{cgGroup=g; renderCgGroups(); renderGuide();}},g)); }
 function loadColour(c,sex){
@@ -2309,6 +2353,163 @@ $('#simSkip').addEventListener('click',skipSim);
 $('#simClose').addEventListener('click',closeSim);
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('#sim').hidden) closeSim(); });
 
+/* ===================== identify a colour from photos ===================== */
+const Idf = {files:{}, urls:{}, ans:{}, sample:null, built:false, busy:false};
+const ID_SHOTS = [
+ ['front','Front','Face on, at eye level. Shows eyes, nose and ear colour.','<circle cx="12" cy="13" r="6"/><path d="M9 8c-1-3-1-5 0-6M15 8c1-3 1-5 0-6"/><circle cx="10" cy="12" r=".6"/><circle cx="14" cy="12" r=".6"/>'],
+ ['side','Side','Whole body side-on. Shows flank, belly line and feet.','<ellipse cx="13" cy="14" rx="8" ry="5"/><circle cx="5" cy="10" r="3"/><path d="M5 7c0-3 1-4 2-5"/>'],
+ ['top','From above','Looking straight down on the back. Shows top colour and pattern.','<ellipse cx="12" cy="13" rx="5" ry="8"/><circle cx="12" cy="5" r="2.5"/>'],
+ ['coat','Coat parted (optional)','Blow into the fur on the back and snap the rings of colour down to the skin.','<path d="M4 20c2-8 4-12 8-16 4 4 6 8 8 16"/><path d="M12 4v16M8 12l4 3 4-3"/>'],
+];
+function idQuestions(){
+  const eyes=[['dark','Brown / dark'],['bluegrey','Blue-grey'],['pink','Pink or ruby']]; if(SP.id==='rabbit') eyes.push(['blue','Bright blue']);
+  return [
+   {k:'eyes',label:'Eye colour',hint:'Check in daylight. A ruby glow in a dark eye still counts as dark.',opts:eyes},
+   {k:'ticked',label:'Is the coat ticked?',hint:'Blow into the fur: ticked coats show bands of different colours along each hair.',opts:[['yes','Yes, banded hairs'],['no','No, one colour to the skin']]},
+   {k:'belly',label:'Belly colour',hint:'',opts:[['same','Same as the body'],['pale','White, cream or tan']]},
+   {k:'points',label:'Darker nose, ears, feet or tail than the body?',hint:'',opts:[['yes','Yes'],['no','No, even colour']]},
+   {k:'patches',label:'Two colours in bands or patches (not counting white)?',hint:SP.id==='rabbit'?'Like a harlequin or magpie.':'Like a tortoiseshell.',opts:[['yes','Yes'],['no','No']]},
+   {k:'white',label:'Any white markings?',hint:'',opts:[['none','None'],['little','A little (nose, blaze, feet)'],['patches','Patches'],['mostly','Mostly white']]},
+  ];
+}
+function idFeat(c){
+  const e=c.eyes.toLowerCase();
+  return { eyes: /ruby \(pink\)|^pink/.test(e)?'pink' : /^blue$/.test(e)?'blue' : /blue-grey/.test(e)?'bluegrey' : 'dark',
+    ticked: (c.grp==='Agouti'||c.grp==='Argente'||/steel/i.test(c.name))?'yes':'no',
+    belly: c.sk===undefined?'pale':'same', points: (c.sk==='point'||c.sk==='tort')?'yes':'no', patches: (c.sk==='split'||c.sk==='tri')?'yes':'no' };
+}
+function buildIdStatic(){
+  Idf.built=true; Idf.ans={}; $('#idOut').innerHTML='';
+  const qs=$('#idQs'); qs.innerHTML='';
+  for(const q of idQuestions()){
+    const chips=el('div',{class:'chips'});
+    const draw=()=>{ chips.innerHTML=''; for(const [v,l] of q.opts) chips.append(el('button',{class:'chip','aria-pressed':Idf.ans[q.k]===v,onclick:()=>{ if(Idf.ans[q.k]===v) delete Idf.ans[q.k]; else Idf.ans[q.k]=v; draw(); }},l)); chips.append(el('span',{class:'small muted',style:'align-self:center'},Idf.ans[q.k]?'':'Not sure')); };
+    draw(); qs.append(el('div',{class:'idq'},el('div',{class:'ql'},q.label),q.hint?el('div',{class:'qh'},q.hint):null,chips));
+  }
+  renderIdShots(); renderIdMode();
+  const A=$('#idAboutBody'); A.innerHTML='';
+  for(const t of [
+    '<b>The % is a confidence score, not a guarantee.</b> It shows how strongly the photos and your answers point to each colour. It has not been measured against a set of known rabbits, so treat it as “likely”, never “certain”.',
+    '<b>What helps most:</b> natural daylight, no flash, a plain background, a dry brushed coat, all three angles plus the parted-coat photo, and answering every question. Each missing photo or “not sure” lowers the confidence.',
+    '<b>Colours that are easily confused:</b> black and seal; blue, lilac and smoke pearl; chocolate and dark sable; orange and fawn; agouti, opal and chinchilla in poor light. Indoor bulbs make coats look warmer and browner than they are.',
+    '<b>Age matters.</b> Kits often change colour: pointed and sable kits darken, and many colours are unclear before 4–8 weeks. Moulting adults can look patchy or faded.',
+    '<b>Photos can’t show hidden genes.</b> This identifies what the animal looks like, not what it carries. Use pedigrees and past litters for carriers, and Vienna carriers can show no white at all.',
+    '<b>For showing or selling,</b> have the colour confirmed by an experienced breeder or your breed club against the breed standard.',
+  ]) A.append(el('div',{html:t}));
+}
+function renderIdShots(){
+  const box=$('#idShots'); box.innerHTML='';
+  for(const [k,title,tip,icon] of ID_SHOTS){
+    const inp=el('input',{type:'file',accept:'image/*',hidden:true});
+    inp.addEventListener('change',()=>{ const f=inp.files&&inp.files[0]; if(!f) return; if(Idf.urls[k]) URL.revokeObjectURL(Idf.urls[k]); Idf.files[k]=f; Idf.urls[k]=URL.createObjectURL(f); renderIdShots(); });
+    const has=!!Idf.files[k];
+    const card=el('div',{class:'shot'+(has?' has':''),role:'button',tabindex:'0','aria-label':`${has?'Replace':'Add'} ${title} photo`,onclick:e=>{ if(e.target.closest('.rm')) return; inp.click(); },onkeydown:e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); inp.click(); } }},
+      el('div',{class:'ph'}, has?el('img',{src:Idf.urls[k],alt:`${title} photo`}):el('span',{html:`<svg viewBox="0 0 24 24">${icon}</svg>`})),
+      el('b',{},title), el('span',{},has?'Tap to replace':tip), inp,
+      has?el('button',{class:'rm','aria-label':`Remove ${title} photo`,onclick:()=>{ URL.revokeObjectURL(Idf.urls[k]); delete Idf.files[k]; delete Idf.urls[k]; renderIdShots(); }},'✕'):null);
+    box.append(card);
+  }
+}
+function renderIdMode(){ $('#idMode').textContent = Idf.sample ? 'Photos are sent to Claude for analysis and are not saved in the app.' : 'Analysed on this device. Photos never leave your phone.'; }
+(async()=>{ try{ if(!window.claude?.use) return; const sm=await window.claude.use('sample'); if(!sm) return; let ok=false; try{ ok=!!(await sm.limits())?.images; }catch{} if(ok){ Idf.sample=sm; renderIdMode(); } }catch{} })();
+
+async function idBitmap(file,max){ const bmp=await createImageBitmap(file); const sc=Math.min(1,max/Math.max(bmp.width,bmp.height)); const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(bmp.width*sc)); c.height=Math.max(1,Math.round(bmp.height*sc)); c.getContext('2d').drawImage(bmp,0,0,c.width,c.height); return c; }
+const hexRgb = h => { const n=parseInt(h.slice(1),16); return [n>>16&255,n>>8&255,n&255]; };
+function rgbLab([r,g,b]){ const f=v=>{ v/=255; return v>0.04045?Math.pow((v+0.055)/1.055,2.4):v/12.92; }; r=f(r); g=f(g); b=f(b);
+  let x=(r*0.4124+g*0.3576+b*0.1805)/0.95047, y=r*0.2126+g*0.7152+b*0.0722, z=(r*0.0193+g*0.1192+b*0.9505)/1.08883;
+  const t=v=>v>0.008856?Math.cbrt(v):7.787*v+16/116; x=t(x); y=t(y); z=t(z); return [116*y-16,500*(x-y),200*(y-z)]; }
+const dE = (a,b) => Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+async function idClusters(file){
+  const c=await idBitmap(file,96), w=c.width, h=c.height, d=c.getContext('2d').getImageData(Math.floor(w*0.25),Math.floor(h*0.25),Math.ceil(w*0.5),Math.ceil(h*0.5)).data;
+  const bins=new Map(); let n=0;
+  for(let i=0;i<d.length;i+=4){ const key=(d[i]>>5)<<6|(d[i+1]>>5)<<3|(d[i+2]>>5); let b=bins.get(key); if(!b){ b=[0,0,0,0]; bins.set(key,b); } b[0]++; b[1]+=d[i]; b[2]+=d[i+1]; b[3]+=d[i+2]; n++; }
+  return [...bins.values()].sort((a,b)=>b[0]-a[0]).slice(0,5).filter(b=>b[0]/n>=0.06).map(b=>({w:b[0]/n,lab:rgbLab([b[1]/b[0],b[2]/b[0],b[3]/b[0]])}));
+}
+async function idLocal(){
+  const pool=SP.colours.filter(c=>!c.loadPattern), photos=[];
+  for(const k of ['front','side','top','coat']) if(Idf.files[k]){ try{ photos.push(await idClusters(Idf.files[k])); }catch{} }
+  const scored=pool.map(c=>{
+    const f=idFeat(c); let sc=1; const why=[];
+    for(const k of ['eyes','ticked','belly','points','patches']){ const a=Idf.ans[k]; if(!a) continue; if(a===f[k]) why.push(k); else sc*=0.12; }
+    if(photos.length){ const t=rgbLab(hexRgb(c.sw[0])), t2=rgbLab(hexRgb(c.sw[1])); let sim=0;
+      for(const cl of photos){ if(!cl.length) continue; const d1=Math.min(...cl.map(x=>dE(x.lab,t))), d2=Math.min(...cl.map(x=>dE(x.lab,t2))); sim+=Math.exp(-d1/18)*0.75+Math.exp(-d2/18)*0.25; }
+      sc*=sim/photos.length; if(sim/photos.length>0.45) why.push('photo'); }
+    return {c,sc,why};
+  }).sort((a,b)=>b.sc-a.sc);
+  const tot=scored.reduce((s,x)=>s+x.sc*x.sc,0)||1, answered=Object.keys(Idf.ans).filter(k=>k!=='white').length;
+  const cap=0.65*[0.55,0.8,0.9,1,1][Math.min(photos.length,4)]*(answered>=4?1:answered>=2?0.88:0.75);
+  const WHY={eyes:'eye colour',ticked:'ticking',belly:'belly colour',points:'points',patches:'patching',photo:'coat colour in the photos'};
+  return {mode:'local', photos:photos.length, candidates:scored.slice(0,4).filter(x=>x.sc>0).map(x=>({name:x.c.name,confidence:Math.max(1,Math.round(x.sc*x.sc/tot*cap*100)),reason:x.why.length?`Matches on ${joinList(x.why.map(k=>WHY[k]))}.`:'Weak match.'})), issues:[]};
+}
+async function idAI(){
+  const pool=SP.colours.filter(c=>!c.loadPattern).map(c=>c.name), blobs=[], labels=[];
+  for(const [k,title] of ID_SHOTS) if(Idf.files[k]){ const c=await idBitmap(Idf.files[k],1024); const b=await new Promise(r=>c.toBlob(r,'image/jpeg',0.85)); if(b){ blobs.push(b); labels.push(title); } }
+  const qa=idQuestions().map(q=>`${q.label}: ${Idf.ans[q.k]?q.opts.find(o=>o[0]===Idf.ans[q.k])[1]:'not sure'}`).join('\n');
+  const pats=Object.keys(SP.patterns).concat(SP.id==='rabbit'?['vm']:[]);
+  const prompt=`You are helping a breeder identify the coat colour of a ${SP.name.toLowerCase()} (breed: ${BR.name}) from photos.
+Photos attached, in order: ${labels.join(', ')||'none'}.
+The owner's answers:
+${qa}
+
+Choose ONLY from this list of colour names (use the exact spelling):
+${pool.join('; ')}
+
+Patterns (white markings) to choose from: ${pats.join(', ')}${SP.id==='rabbit'?' (vm = Vienna marked: small white blaze, nose or feet)':''}.
+
+Rules: Judge the base colour ignoring white patches. Weigh the owner's answers heavily for eye colour and ticking, which photos show poorly. Be honest and calibrated: confidence is your probability (0-100) that the colour is right; never above 90; lower it for poor lighting, flash, blur, wet or moulting coat, very young animals, or when similar colours cannot be told apart. Confidences across candidates should sum to at most 100. If a photo does not show a ${SP.name.toLowerCase()}, say so in issues and return no candidates.
+Reply with JSON only, no other text:
+{"photo_quality":"good|ok|poor","issues":["short plain-English problems with the photos, if any"],"candidates":[{"name":"exact name from the list","confidence":0,"reason":"one short sentence a breeder would understand"}],"pattern":"one pattern key","notes":"one short sentence of advice, e.g. what to check to tell the top two apart"}
+Give up to 4 candidates, most likely first.`;
+  const r=await Idf.sample(prompt,{images:blobs,cache:false});
+  const m=(r?.text||'').match(/\{[\s\S]*\}/); if(!m) throw new Error('bad reply');
+  const j=JSON.parse(m[0]), byLower=Object.fromEntries(pool.map(n=>[n.toLowerCase(),n]));
+  const cands=(Array.isArray(j.candidates)?j.candidates:[]).map(c=>({name:byLower[String(c.name||'').toLowerCase()],confidence:Math.max(1,Math.min(90,Math.round(+c.confidence||0))),reason:String(c.reason||'').slice(0,220)})).filter(c=>c.name).slice(0,4);
+  return {mode:'ai', photos:blobs.length, candidates:cands, issues:(Array.isArray(j.issues)?j.issues:[]).map(x=>String(x).slice(0,160)).slice(0,4), quality:['good','ok','poor'].includes(j.photo_quality)?j.photo_quality:'', pattern:pats.includes(j.pattern)?j.pattern:'', notes:String(j.notes||'').slice(0,260)};
+}
+function idPattern(res){
+  const w=Idf.ans.white;
+  if(w) return SP.id==='rabbit' ? {none:'solid',little:'vm',patches:'broken',mostly:'charlie'}[w] : (w==='none'?'solid':'white-marked');
+  return res.pattern||'';
+}
+function idApply(name,pat,sex){
+  const P=parents[sex]; P.dist=null; applyPreset(P.g,name);
+  if(pat==='vm'){ setPattern(P.g,'solid'); P.g.V=['V','v']; } else if(pat && SP.patterns[pat]) setPattern(P.g,pat);
+  P.example='From photo check'; renderParents(); showColSub('calc'); window.scrollTo(0,0); toast(`${name} loaded as the ${(sex==='doe'?SP.female:SP.male).toLowerCase()}`);
+}
+function renderIdResult(res){
+  const out=$('#idOut'); out.innerHTML='';
+  const pat=idPattern(res), PL={solid:'no white markings',vm:'Vienna marked (a little white)',broken:'broken',charlie:'charlie (mostly white)','white-marked':'white-marked',roan:'roan','roan-white':'roan & white'};
+  out.append(el('div',{class:'small muted'}, res.mode==='ai'?`Analysed by Claude from ${res.photos} photo${res.photos===1?'':'s'} and your answers.`:`Basic on-device colour match from ${res.photos} photo${res.photos===1?'':'s'} and your answers. The web version on claude.ai uses AI vision and is more accurate.`));
+  if(res.quality==='poor' || res.issues.length) out.append(el('div',{class:'note warn'},el('b',{},res.quality==='poor'?'Photo quality is poor. ':'Photo notes. '),res.issues.join(' ')||'Retake in daylight for a better result.'));
+  if(!res.candidates.length){ out.append(el('div',{class:'empty',html:'<b>No confident match</b>Try clearer photos in daylight and answer the questions above.'})); return; }
+  res.candidates.forEach((c,i)=>{
+    const col=SP.colours.find(x=>x.name===c.name);
+    out.append(el('div',{class:'card idres'+(i===0?' top':'')},
+      el('div',{class:'sw',style:`background:${swatchCSS(col)}`,role:'img','aria-label':`${c.name} swatch`}),
+      el('div',{class:'nm'},c.name), el('div',{class:'pc'},`${c.confidence}%`),
+      el('div',{class:'conf',style:'grid-column:2/-1'},el('i',{style:`width:${c.confidence}%`})),
+      el('div',{class:'full small'},i===0?el('b',{},'Most likely. '):null,c.reason),
+      el('div',{class:'full small muted'},`Eyes: ${col.eyes}. ${col.desc}`),
+      el('div',{class:'full actions'},el('button',{class:'sm',onclick:()=>idApply(c.name,pat,'doe')},`Use as ${SP.female.toLowerCase()}`),el('button',{class:'sm',onclick:()=>idApply(c.name,pat,'buck')},`Use as ${SP.male.toLowerCase()}`))));
+  });
+  if(pat && pat!=='solid') out.append(el('div',{class:'note info'},el('b',{},'Pattern: '),`${PL[pat]||pat}. This is applied when you load the colour into the calculator.`));
+  if(res.notes) out.append(el('div',{class:'note info'},el('b',{},'Tip: '),res.notes));
+  const top=res.candidates[0].confidence;
+  out.append(el('div',{class:'small muted'}, top>=70?'A strong match, but still a suggestion: confirm against the breed standard.':top>=45?'A reasonable match. Check the runner-up colours too.':'Low confidence. Better photos and answering every question should help.',' The % is a confidence estimate, not a measured accuracy; see “How accurate is this?” below.'));
+}
+$('#idRun').addEventListener('click',async()=>{
+  if(Idf.busy) return;
+  const nPh=Object.keys(Idf.files).length;
+  if(!nPh && !Object.keys(Idf.ans).length){ toast('Add at least one photo or answer a question first.'); return; }
+  Idf.busy=true; const btn=$('#idRun'), old=btn.innerHTML; btn.innerHTML='<span class="spin"></span> Analysing…'; btn.disabled=true;
+  let res=null;
+  try{ if(Idf.sample && nPh) res=await idAI(); }
+  catch(e){ if(e?.code==='not_granted'){ Idf.sample=null; renderIdMode(); } else if(e?.code==='rate_limited') toast('Claude is busy. Using the on-device match for now.'); else toast('AI analysis didn’t work. Using the on-device match.'); }
+  try{ if(!res) res=await idLocal(); renderIdResult(res); $('#idOut').scrollIntoView({behavior:'smooth',block:'start'}); }
+  catch{ toast('Couldn’t read those photos. Try different ones.'); }
+  btn.innerHTML=old; btn.disabled=false; Idf.busy=false;
+});
+
 /* ===================== backup ===================== */
 $('#bkCopy').addEventListener('click',async()=>{
   const txt=JSON.stringify({app:'breeding-kit',v:1,exported:new Date().toISOString(),herd:Store.data.herd,litters:Store.data.litters});
@@ -2585,6 +2786,7 @@ const GUIDE = [
  ['Colour calculator',`<ol><li>Choose each parent from your herd, or set a colour and pattern.</li><li>Open “Genes, coat &amp; hidden carriers” to add known hidden genes.</li><li>The results show every possible colour with its odds, then coat type and size (dwarf, rex, long wool, mane, satin; rosettes, crests and long coats for guinea pigs).</li></ol><p>Warnings appear for risky pairings: charlies, peanuts (two true dwarfs), lethal whites (two roan or dalmatian guinea pigs) and satins. If a parent has a pedigree, its odds are used automatically; untick “Use pedigree odds” to ignore them.</p>`,[['Open calculator','calc']]],
  ['Simulate a litter',`<p>Tap <b>Simulate a litter</b> under the parents to watch a random litter appear, drawn from the real odds. Each baby shows its colour, coat, sex and how likely it was. Babies that couldn’t survive show as faded outlines. Tap <b>Breed again</b> for another litter, or turn the animation off in Settings.</p>`,[['Try it','sim']]],
  ['Colour guide',`<p>Every colour the app knows, with a swatch, eye colour, genes and what both parents need to carry to produce it. Use the search and group buttons to find a colour, then “Use as doe/buck” to load it into the calculator.</p>`,[['Open colour guide','guide-colours']]],
+ ['Identify a colour from photos',`<ol><li>Open <b>Colours → Identify</b>.</li><li>Add a front, side and from-above photo, plus an optional parted-coat photo. Use daylight, no flash and a plain background.</li><li>Answer the quick questions (eye colour, ticking, belly, points, white).</li><li>Tap <b>Analyse colour</b> for the most likely colours with a confidence %, then load one into the calculator.</li></ol><p>The % is a confidence estimate, not a guarantee, and photos can’t show hidden genes. The claude.ai web version uses AI vision; the phone app does a simpler on-device match.</p>`,[['Open Identify','identify']]],
  ['Breed for a colour',`<ol><li>Open <b>Colours → Breed for</b> and choose the colour and pattern you want.</li><li>Every pairing in your herd is ranked by the chance of producing it, with risks flagged.</li><li><b>Bring in a new animal</b> shows the best outside doe or buck to buy (colour plus any hidden genes they’d need) and which of yours to pair them with.</li><li>If no single new animal helps, you get a starting pair to buy instead.</li></ol><p>Ask breeders for pedigrees or test-litter results to confirm hidden genes before buying.</p>`,[['Open Breed for','want']]],
  ['Due dates & litters',`<ul><li><b>Due</b>: enter the mating date to see the due date, the normal window and a full timeline from mating to new homes. Add the birth date to switch to the babies’ age.</li><li><b>Litters</b>: log each mating, then tap “Record birth” to add numbers born and alive. Overdue litters turn red.</li><li>Rabbits: 28–35 days (usually 31). Guinea pigs: 59–72 days (usually 63–68).</li></ul>`,[['Log a mating','litters']]],
  ['Health check',`<ol><li>If you see any <b>emergency sign</b>, tap it and ring your vet straight away.</li><li>Otherwise tap the body area and the signs you can see. The most likely causes appear with what to do now and how urgent it is.</li><li><b>Record this check</b> to save it to the animal’s health log, or <b>copy a summary</b> to send or read to your vet.</li><li>Mark checks resolved when they’re better. Routine daily, weekly and yearly checks are at the bottom.</li></ol><p>The checker is a guide to help you act quickly. It is not a diagnosis.</p>`,[['Open Health','health']]],
@@ -2595,7 +2797,7 @@ const GUIDE = [
 const GUIDE_GO = {
  'herd':()=>go('herd'), 'herd-add':()=>{ go('herd'); openHerdForm(null); }, 'vet':()=>$('#setVet').click(),
  'calc':()=>{ go('colours'); showColSub('calc'); }, 'sim':()=>{ go('colours'); showColSub('calc'); runSim(); }, 'guide-colours':()=>{ go('colours'); showColSub('guide'); },
- 'want':()=>{ go('colours'); showColSub('want'); }, 'litters':()=>go('litters'), 'health':()=>go('health'), 'settings':()=>go('settings'),
+ 'want':()=>{ go('colours'); showColSub('want'); }, 'identify':()=>{ go('colours'); showColSub('id'); }, 'litters':()=>go('litters'), 'health':()=>go('health'), 'settings':()=>go('settings'),
  'backup':()=>{ go('settings'); $('#backup').open=true; setTimeout(()=>$('#backup').scrollIntoView({block:'center'}),50); },
 };
 function renderGuidePage(){
