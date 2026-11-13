@@ -63,12 +63,12 @@ img{max-width:100%}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 10px;border-bottom:1px solid var(--line);margin-bottom:12px}
 .hrow{display:flex;gap:12px;align-items:center;justify-content:space-between}
 .hrow > div{min-width:0}
-header.top h1{font-family:var(--display);font-weight:400;font-size:1.4rem;margin:0;line-height:1.15}
+header.top h1{font-family:var(--display);font-weight:400;font-size:1.25rem;margin:0;line-height:1.15}
 header.top p{margin:2px 0 0;color:var(--muted);font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hrow > div:first-child{flex:1 1 auto;min-width:0}
 header.top h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hbtns{flex:none}
-#breedSel{flex:none;width:auto;max-width:40vw;font-weight:600;background:var(--accent-soft);color:var(--accent);border-color:transparent}
+#breedSel{flex:none;width:auto;max-width:34vw;font-weight:600;background:var(--accent-soft);color:var(--accent);border-color:transparent}
 h2{font-family:var(--display);font-weight:400;font-size:1.25rem;margin:0 0 4px;text-wrap:balance}
 h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px;font-weight:700}
 p.lede{color:var(--muted);margin:0 0 14px;max-width:62ch}
@@ -395,7 +395,7 @@ a.call.ooh{background:var(--danger)}
 <section class="panel" id="p-home" data-tab="home">
   <div class="hero">
     <h2 id="homeHello">Hutchmate</h2>
-    <div class="small muted" id="homeSub"></div>
+    <div class="small" id="homeTip" style="margin-top:6px"></div>
   </div>
   <div id="updBanner" hidden></div>
   <div class="tiles" id="homeTiles"></div>
@@ -407,7 +407,6 @@ a.call.ooh{background:var(--danger)}
     <h3>Quick actions</h3>
     <div class="qa" id="homeQa"></div>
   </div>
-  <div class="card small" id="homeTip"></div>
 </section>
 
 <!-- COLOURS -->
@@ -2781,7 +2780,6 @@ const TIPS = {
 function renderHome(){
   const hr=new Date().getHours(), greet = hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
   $('#homeHello').textContent=greet;
-  $('#homeSub').textContent=`${BR.name} · ${SP.plural}. Tap the gear for settings and the user guide.`;
   const H=herdHere(), does=H.filter(r=>r.sex==='doe').length, bucks=H.length-does;
   const active=littersHere().filter(L=>{ const sp=SPECIES[spOf(L)], t=today(), k=parseD(L.kindled), m=parseD(L.mated); return k ? diffDays(t,k)<sp.homeDay : (m && diffDays(t,m)<=sp.gest.max+3); }).length;
   const ill=Store.data.health.filter(h=>spOf(h)===SP.id && !h.resolved).length;
