@@ -1,0 +1,8 @@
+{
+  // Cloudflare Workers static site: `npm run build:web` creates ./www, then `npx wrangler deploy` publishes it.
+  "name": "hutchmate",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./www"
+  }
+}

@@ -26,9 +26,9 @@ Keep `release.jks` and its passwords safe: you can't update the Play listing wit
 Data is stored on the phone. Use **Herd → Backup & move to another device** to copy everything out
 (e.g. from the claude.ai web version) and paste it in to restore.
 
-## Website (Cloudflare Pages)
-Workers & Pages → Create → Pages → Connect to Git → `Helzari/hutchmate`, then:
+## Website (Cloudflare)
+Workers & Pages → Create → Import a repository → `Helzari/hutchmate`, then:
 - Build command: `npm run build:web`
-- Build output directory: `www`
+- Deploy command: `npx wrangler deploy` (uses `wrangler.jsonc`, which publishes `www/`)
 
 Every push to `main` redeploys the site and builds a new APK.
