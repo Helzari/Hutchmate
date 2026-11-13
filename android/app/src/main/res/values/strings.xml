@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hutchmate</string>
+    <string name="title_activity_main">Hutchmate</string>
+    <string name="package_name">uk.helzari.hutchmate</string>
+    <string name="custom_url_scheme">uk.helzari.hutchmate</string>
+</resources>

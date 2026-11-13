@@ -1,0 +1,6 @@
+{
+  "appId": "uk.helzari.hutchmate",
+  "appName": "Hutchmate",
+  "webDir": "www",
+  "android": { "backgroundColor": "#F3F5F0" }
+}
