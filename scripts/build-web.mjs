@@ -31,8 +31,26 @@ fs.writeFileSync(path.join(out,'sw.js'),`// Network first so updates arrive stra
 const C='hutchmate-${stamp}';
 self.addEventListener('install',e=>{ self.skipWaiting(); e.waitUntil(caches.open(C).then(c=>c.addAll(['./','manifest.webmanifest','icon-192.png',${fonts.flatMap(([f,pkg,ws])=>ws.map(w=>`'fonts/${pkg}-latin-${w}-normal.woff2'`)).join(',')}]).catch(()=>{}))); });
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{ const r=e.request; if(r.method!=='GET' || new URL(r.url).origin!==location.origin) return;
+self.addEventListener('fetch',e=>{ const r=e.request; if(r.method!=='GET' || new URL(r.url).origin!==location.origin || /\\.apk$|version\\.json$/.test(new URL(r.url).pathname)) return;
   e.respondWith(fetch(r).then(res=>{ if(res.ok){ const cp=res.clone(); caches.open(C).then(c=>c.put(r,cp)); } return res; }).catch(()=>caches.match(r,{ignoreSearch:true}).then(m=>m||caches.match('./')))); });
 `);
 fs.writeFileSync(path.join(out,'index.html'),html);
+
+// Website build only (not inside the APK build): host the latest APK and its build number,
+// so the phone app can check hutchmate.app for updates.
+fs.writeFileSync(path.join(out,'_headers'),'/version.json\n  Access-Control-Allow-Origin: *\n  Cache-Control: no-store\n/Hutchmate.apk\n  Cache-Control: no-store\n');
+if(!process.env.GITHUB_ACTIONS){
+  const REPO='Helzari/hutchmate', H=process.env.GITHUB_TOKEN?{Authorization:`Bearer ${process.env.GITHUB_TOKEN}`}:{};
+  try{
+    let n=0;
+    try{ const r=await fetch(`https://api.github.com/repos/${REPO}/releases/tags/latest`,{headers:{Accept:'application/vnd.github+json','User-Agent':'hutchmate-build',...H}}); if(r.ok){ const m=String((await r.json()).body||'').match(/Build (\d+)/); if(m) n=+m[1]; } }catch{}
+    if(!n){ try{ n=+JSON.parse(fs.readFileSync('site-version.json','utf8')).build||0; }catch{} }
+    const a=await fetch(`https://github.com/${REPO}/releases/download/latest/Hutchmate.apk`,{headers:{'User-Agent':'hutchmate-build',...H}});
+    if(!a.ok) throw new Error('APK download '+a.status);
+    const buf=Buffer.from(await a.arrayBuffer()); if(buf.length<500000 || buf[0]!==0x50 || buf[1]!==0x4b) throw new Error('APK looks wrong');
+    fs.writeFileSync(path.join(out,'Hutchmate.apk'),buf);
+    if(n) fs.writeFileSync(path.join(out,'version.json'),JSON.stringify({build:n,apk:'Hutchmate.apk'}));
+    console.log(`APK bundled: build ${n||'?'}, ${(buf.length/1e6).toFixed(1)} MB`);
+  }catch(e){ console.warn('APK not bundled:',e.message); }
+}
 console.log('www/ built');

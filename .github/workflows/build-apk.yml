@@ -58,6 +58,15 @@ jobs:
             --title "Hutchmate (latest build)" \
             --notes "Build ${{ github.run_number }}. On an Android phone, tap Hutchmate.apk below, then open it and allow installing from this source. Installing over an older version keeps your data."
 
+      - name: Tell the website a new build is ready (Cloudflare rebuilds and hosts the new APK)
+        run: |
+          echo '{"build": ${{ github.run_number }}}' > site-version.json
+          git config user.name "hutchmate-bot"
+          git config user.email "hutchmate-bot@users.noreply.github.com"
+          git add site-version.json
+          git commit -m "Website: publish APK build ${{ github.run_number }}" || exit 0
+          git pull --rebase origin main && git push origin HEAD:main
+
       # ---- Optional: signed release for Google Play. Runs only once the KEYSTORE_BASE64 secret exists. ----
       - name: Build signed release (Play Store bundle + APK)
         if: env.HAS_KEYSTORE == 'true'

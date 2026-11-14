@@ -2730,7 +2730,7 @@ document.addEventListener('click',e=>{ const b=e.target.closest('[data-goto]'); 
 
 /* ===================== update check (phone app) ===================== */
 const APP_BUILD = 0; /*__APP_BUILD__*/
-const UPD = {api:'https://api.github.com/repos/Helzari/hutchmate/releases/tags/latest', apk:'https://github.com/Helzari/Hutchmate/releases/download/latest/Hutchmate.apk', latest:null, state:''};
+const UPD = {site:'https://hutchmate.app/version.json', apk:'https://hutchmate.app/Hutchmate.apk', api:'https://api.github.com/repos/Helzari/hutchmate/releases/tags/latest', ghApk:'https://github.com/Helzari/Hutchmate/releases/download/latest/Hutchmate.apk', latest:null, state:''};
 const isApp = () => APP_BUILD>0;
 function renderUpdate(){
   const t=$('#updTxt'), b=$('#updBanner'), newer=isApp() && UPD.latest>APP_BUILD;
@@ -2743,8 +2743,11 @@ function renderUpdate(){
 }
 async function checkUpdate(manual){
   if(!isApp()) return;
-  try{ const r=await fetch(UPD.api,{headers:{Accept:'application/vnd.github+json'},cache:'no-store'}); if(!r.ok) throw 0; const j=await r.json();
-    const m=String(j.body||'').match(/Build (\d+)/); if(!m) throw 0; UPD.latest=+m[1]; UPD.state='ok'; Settings.updChecked=Date.now(); saveSettings();
+  try{ let n=0;
+    try{ const r=await fetch(UPD.site+'?t='+Date.now(),{cache:'no-store'}); if(r.ok){ const j=await r.json(); n=+j.build||0; } }catch{}
+    if(!n){ const r=await fetch(UPD.api,{headers:{Accept:'application/vnd.github+json'},cache:'no-store'}); if(!r.ok) throw 0; const j=await r.json();
+      const m=String(j.body||'').match(/Build (\d+)/); if(!m) throw 0; n=+m[1]; UPD.apk=UPD.ghApk; }
+    UPD.latest=n; UPD.state='ok'; Settings.updChecked=Date.now(); saveSettings();
     if(manual) toast(UPD.latest>APP_BUILD?`Build ${UPD.latest} is available`:'You’re up to date');
   }catch{ UPD.state='fail'; if(manual) toast('Couldn’t check for updates. Check your connection.'); }
   renderUpdate();
