@@ -1,34 +1,46 @@
-# Hutchmate (Android)
+# Hutchmate
 
-Rabbit & guinea pig breeding app: colour genetics, due dates, litters, herd and health.
-The app lives in `src/index.html`; `npm run build:web` copies it into `www/` with offline fonts,
-and Capacitor wraps it as an Android app (`uk.helzari.hutchmate`).
+**Genetics, litters and health for rabbits and guinea pigs.**
 
-## Get an APK (no Android Studio needed)
-1. Create a new GitHub repo and upload everything in this folder (keep the `.github` folder).
-2. Open the repo's **Actions** tab. The "Build Android app" run starts on every push (or press *Run workflow*).
-3. When it goes green (~5 min), the APK is at **Releases → latest → Hutchmate.apk** (https://github.com/Helzari/hutchmate/releases/latest).
-4. Send the APK to the phone, open it, and allow "Install unknown apps" for your file manager or browser when asked.
+Hutchmate is a breeding companion for hobby breeders. It works out what colours a pairing can produce, keeps track of your herd and litters, and helps you act quickly when an animal is unwell. It runs on your phone and works offline.
 
-Updating: replace `src/index.html`, push, and install the new APK over the old one. Data is kept.
+## What it does
 
-## Google Play (optional, later)
-Create an upload key once on a PC with Java installed:
+- **Colour & coat calculator** – pick a doe and a buck (or sow and boar) and see every possible colour with its odds, plus coat type and size. Warns about risky pairings such as charlies, peanuts (two true dwarfs) and lethal whites (two roan guinea pigs).
+- **Simulate a litter** – watch a random litter appear, drawn from the real odds.
+- **Breed for a colour** – choose the colour you want and see which of your pairings can produce it, or which new animal would be worth bringing in.
+- **Identify a colour** – add photos and answer a few questions to get the most likely colours, each with a confidence score.
+- **Pedigrees** – add each animal's sire and dam so the calculator can estimate the hidden genes it carries.
+- **Colour guide** – every colour with its swatch, eye colour, genes and what the parents need.
+- **Due dates & litter log** – due date, normal window and a timeline from mating to new homes.
+- **Herd records** – colours, hidden genes, ages and notes, with warnings such as "too young to breed".
+- **Health check** – emergency signs, a symptom checker by body area, what to do now, a health log per animal and a summary to send to your vet.
+- **19 rabbit breeds and 13 guinea pig breeds**, each with breed notes.
+- Light, dark, night and high-contrast screen modes, larger text, and a built-in user guide.
 
-    keytool -genkeypair -v -keystore release.jks -alias hutchmate -keyalg RSA -keysize 2048 -validity 10000
+## Get the app (Android)
 
-Then in the repo: Settings → Secrets and variables → Actions, add
-`KEYSTORE_BASE64` (output of `base64 -w0 release.jks`), `KEYSTORE_PASSWORD`, `KEY_ALIAS` (`hutchmate`), `KEY_PASSWORD`.
-The next build also produces **hutchmate-release** with `app-release.aab` for the Play Console.
-Keep `release.jks` and its passwords safe: you can't update the Play listing without them. Never commit it.
+1. On your phone, download **[Hutchmate.apk](https://github.com/Helzari/Hutchmate/releases/download/latest/Hutchmate.apk)**.
+2. Open the downloaded file and tap **Install**. The first time, Android asks you to allow installs from your browser or file manager.
 
-## Data
-Data is stored on the phone. Use **Herd → Backup & move to another device** to copy everything out
-(e.g. from the claude.ai web version) and paste it in to restore.
+**Updating:** the app tells you on the Home page when a newer version is available. Download it and install it over the top; your records are kept.
 
-## Website (Cloudflare)
-Workers & Pages → Create → Import a repository → `Helzari/hutchmate`, then:
-- Build command: `npm run build:web`
-- Deploy command: `npx wrangler deploy` (uses `wrangler.jsonc`, which publishes `www/`)
+## Your data
 
-Every push to `main` redeploys the site and builds a new APK.
+Your animals, litters and health records are stored only on your own device. Nothing is uploaded, and the app contains no one else's data. Use **Settings → Backup** to copy your records to another phone.
+
+## Please note
+
+Hutchmate is a guide, not a guarantee. The genetics cover the main colour, pattern and coat genes and some rarer ones aren't modelled; real litters vary. The health checker helps you decide how urgently to act and is **not veterinary advice** – if you are worried about an animal, contact your vet.
+
+---
+
+## For developers
+
+The whole app is one page, `src/index.html`. `npm run build:web` copies it into `www/` with offline fonts, a web-app manifest and a service worker; [Capacitor](https://capacitorjs.com) wraps that as the Android app (`uk.helzari.hutchmate`).
+
+- **APK:** every push to `main` runs `.github/workflows/build-apk.yml`, which builds the APK and publishes it to the rolling [`latest` release](https://github.com/Helzari/hutchmate/releases/latest).
+- **Website:** Cloudflare builds with `npm run build:web` and deploys `www/` using `wrangler.jsonc`.
+- **Google Play (optional):** add the secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` and `KEY_PASSWORD` and the workflow also produces a signed `app-release.aab`. Never commit your release keystore.
+
+© Helzari. All rights reserved.
