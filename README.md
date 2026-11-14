@@ -24,7 +24,7 @@ Open **[hutchmate.app](https://hutchmate.app)** in your phone's browser. To keep
 
 ## Get the Android app
 
-1. On your phone, download **[Hutchmate.apk](https://github.com/Helzari/Hutchmate/releases/download/latest/Hutchmate.apk)**.
+1. On your phone, download **[Hutchmate.apk](https://hutchmate.app/Hutchmate.apk)**.
 2. Open the downloaded file and tap **Install**. The first time, Android asks you to allow installs from your browser or file manager.
 
 **Updating:** the app tells you on the Home page when a newer version is available. Download it and install it over the top; your records are kept.
@@ -44,7 +44,7 @@ Hutchmate is a guide, not a guarantee. The genetics cover the main colour, patte
 The whole app is one page, `src/index.html`. `npm run build:web` copies it into `www/` with offline fonts, a web-app manifest and a service worker; [Capacitor](https://capacitorjs.com) wraps that as the Android app (`uk.helzari.hutchmate`).
 
 - **APK:** every push to `main` runs `.github/workflows/build-apk.yml`, which builds the APK and publishes it to the rolling [`latest` release](https://github.com/Helzari/hutchmate/releases/latest).
-- **Website:** Cloudflare builds with `npm run build:web` and deploys `www/` using `wrangler.jsonc`.
+- **Website:** Cloudflare builds with `npm run build:web` and deploys `www/` using `wrangler.jsonc`. The build also bundles the latest APK; if this repository is private, set a `GITHUB_TOKEN` build secret in Cloudflare (fine-grained token, Contents: read-only).
 - **Google Play (optional):** add the secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` and `KEY_PASSWORD` and the workflow also produces a signed `app-release.aab`. Never commit your release keystore.
 
 © Helzari. All rights reserved.

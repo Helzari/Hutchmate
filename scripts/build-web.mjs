@@ -42,10 +42,15 @@ fs.writeFileSync(path.join(out,'_headers'),'/version.json\n  Access-Control-Allo
 if(!process.env.GITHUB_ACTIONS){
   const REPO='Helzari/hutchmate', H=process.env.GITHUB_TOKEN?{Authorization:`Bearer ${process.env.GITHUB_TOKEN}`}:{};
   try{
-    let n=0;
-    try{ const r=await fetch(`https://api.github.com/repos/${REPO}/releases/tags/latest`,{headers:{Accept:'application/vnd.github+json','User-Agent':'hutchmate-build',...H}}); if(r.ok){ const m=String((await r.json()).body||'').match(/Build (\d+)/); if(m) n=+m[1]; } }catch{}
+    let n=0, assetUrl='';
+    try{ const r=await fetch(`https://api.github.com/repos/${REPO}/releases/tags/latest`,{headers:{Accept:'application/vnd.github+json','User-Agent':'hutchmate-build',...H}});
+      if(r.ok){ const j=await r.json(); const m=String(j.body||'').match(/Build (\d+)/); if(m) n=+m[1]; assetUrl=(j.assets||[]).find(x=>x.name==='Hutchmate.apk')?.url||''; }
+      else if(process.env.GITHUB_TOKEN) console.warn('GitHub API said',r.status,'- check the GITHUB_TOKEN can read this repository'); }catch{}
     if(!n){ try{ n=+JSON.parse(fs.readFileSync('site-version.json','utf8')).build||0; }catch{} }
-    const a=await fetch(`https://github.com/${REPO}/releases/download/latest/Hutchmate.apk`,{headers:{'User-Agent':'hutchmate-build',...H}});
+    // With a token (private repo) the APK must come through the API; otherwise use the public download link.
+    const a = (process.env.GITHUB_TOKEN && assetUrl)
+      ? await fetch(assetUrl,{headers:{Accept:'application/octet-stream','User-Agent':'hutchmate-build',...H}})
+      : await fetch(`https://github.com/${REPO}/releases/download/latest/Hutchmate.apk`,{headers:{'User-Agent':'hutchmate-build'}});
     if(!a.ok) throw new Error('APK download '+a.status);
     const buf=Buffer.from(await a.arrayBuffer()); if(buf.length<500000 || buf[0]!==0x50 || buf[1]!==0x4b) throw new Error('APK looks wrong');
     fs.writeFileSync(path.join(out,'Hutchmate.apk'),buf);
