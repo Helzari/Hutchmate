@@ -1,6 +1,6 @@
 # Hutchmate
 
-**Genetics, litters and health for rabbits and guinea pigs.**
+**Genetics, litters and health for rabbits and guinea pigs.** · [hutchmate.app](https://hutchmate.app)
 
 Hutchmate is a breeding companion for hobby breeders. It works out what colours a pairing can produce, keeps track of your herd and litters, and helps you act quickly when an animal is unwell. It runs on your phone and works offline.
 
@@ -18,7 +18,11 @@ Hutchmate is a breeding companion for hobby breeders. It works out what colours 
 - **19 rabbit breeds and 13 guinea pig breeds**, each with breed notes.
 - Light, dark, night and high-contrast screen modes, larger text, and a built-in user guide.
 
-## Get the app (Android)
+## Use it now
+
+Open **[hutchmate.app](https://hutchmate.app)** in your phone's browser. To keep it on your home screen, open the browser menu and choose **Add to Home screen** (Chrome) or **Share → Add to Home Screen** (iPhone). It then opens like a normal app, works offline and updates itself.
+
+## Get the Android app
 
 1. On your phone, download **[Hutchmate.apk](https://github.com/Helzari/Hutchmate/releases/download/latest/Hutchmate.apk)**.
 2. Open the downloaded file and tap **Install**. The first time, Android asks you to allow installs from your browser or file manager.
