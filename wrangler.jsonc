@@ -1,8 +1,14 @@
 {
-  // Cloudflare Workers static site: `npm run build:web` creates ./www, then `npx wrangler deploy` publishes it.
+  // Cloudflare Worker: serves the static site from ./www and the Hutchmate API (accounts, plans, cloud backup) under /api.
   "name": "hutchmate",
+  "main": "worker/index.js",
   "compatibility_date": "2025-09-01",
   "assets": {
-    "directory": "./www"
-  }
+    "directory": "./www",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "hutchmate", "database_id": "06907ca4-c286-4a80-ba1a-726d226f41c1" }
+  ]
 }

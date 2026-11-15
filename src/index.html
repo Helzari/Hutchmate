@@ -330,6 +330,21 @@ a.call.ooh{background:var(--danger)}
 .spin{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-3px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* plans */
+.tiers{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.tier{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:4px;position:relative}
+.tier.cur{border:2px solid var(--accent)}
+.tier .tn{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tier .tp{font-family:var(--display);font-size:1.5rem;line-height:1.1}
+.tier .tp small{font-family:var(--body);font-size:.78rem;color:var(--muted)}
+.tier .td{font-size:.8rem;color:var(--muted);flex:1}
+.tier .badge{position:absolute;top:-9px;right:10px}
+.feat{margin:6px 0 0;padding-left:18px;font-size:.88rem;display:flex;flex-direction:column;gap:3px}
+.codebox{font-family:var(--mono);font-size:.86rem;background:var(--bg);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.urow{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.urow:first-of-type{border-top:0}
+.urow > div{min-width:0;overflow-wrap:anywhere}
+
 /* litter simulation */
 .sim-cta{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 16px;font-size:1rem;border-radius:var(--radius)}
 .sim-cta svg{width:20px;height:20px;fill:currentColor}
@@ -636,11 +651,29 @@ a.call.ooh{background:var(--danger)}
   </details>
   </div>
   <div class="card">
+    <h3>Hutchmate Pro</h3>
+    <div class="setrow"><div><b id="setProTitle">Plans &amp; account</b><div class="small muted" id="setProTxt"></div></div><button class="sm primary" data-goto="plans">Open</button></div>
+  </div>
+  <div class="card">
     <h3>Help</h3>
     <div class="setrow"><div><b>User guide</b><div class="small muted">How every part of the app works.</div></div><button class="sm primary" data-goto="guide">Open</button></div>
     <div class="setrow"><div><b>App version</b><div class="small muted" id="updTxt"></div></div><button class="sm" id="updCheck">Check for updates</button></div>
     <div class="setrow"><div><b>About</b><div class="small muted">Hutchmate · genetics, litters &amp; health for rabbits and guinea pigs. Genetics and health information are a guide only; always check with your vet and breed club.</div></div></div>
   </div>
+</section>
+
+<!-- PLANS -->
+<section class="panel" id="p-plans" data-tab="plans" hidden>
+  <div><h2>Hutchmate Pro</h2><p class="lede">Everything you use today stays free. Pro adds extras for serious breeders, starting with cloud backup.</p></div>
+  <div id="proUnavailable" class="card" hidden><b>Accounts work in the Hutchmate app.</b><div class="small muted" style="margin-top:4px">Open <b>hutchmate.app</b> in your browser or use the Android app to sign in and use Pro features.</div></div>
+  <div id="proBody" class="panel">
+    <div class="card" id="proAccount"></div>
+    <div class="tiers" id="proTiers"></div>
+    <div class="card" id="proRedeem"></div>
+    <div class="card" id="proCloud" hidden></div>
+    <div class="card" id="proAdmin" hidden></div>
+  </div>
+  <button class="ghost backlink" data-goto="settings">← Back to settings</button>
 </section>
 
 <!-- GUIDE -->
@@ -1617,7 +1650,7 @@ function geneEditor(g, onChange){
 const Store = {mode:'local', db:null, data:{litters:[],herd:[],health:[],config:[]}, readOnly:false};
 const lsKey = c => 'lopkit_'+c;
 function lsLoad(c){ try{ return JSON.parse(localStorage.getItem(lsKey(c))||'[]'); }catch{ return []; } }
-function lsSave(c){ try{ localStorage.setItem(lsKey(c),JSON.stringify(Store.data[c])); }catch{} }
+function lsSave(c){ try{ localStorage.setItem(lsKey(c),JSON.stringify(Store.data[c])); }catch{} if(typeof Pro!=='undefined') Pro.schedule(); }
 Store.data.litters=lsLoad('litters'); Store.data.herd=lsLoad('herd'); Store.data.health=lsLoad('health'); Store.data.config=lsLoad('config');
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 function dbErr(e){ if(e?.code==='invalid_argument'){ Store.readOnly=true; toast('You can view these records but not change them. Ask for Contributor access.'); } else if(e?.code==='quota_exceeded'){ toast('Storage is full. Delete some old records first.'); } else toast('Could not save. Check your connection and try again.'); }
@@ -1752,8 +1785,8 @@ function renderBreedCard(){
 }
 
 /* ===================== tabs ===================== */
-const TABS=['home','colours','due','litters','herd','health','settings','guide'];
-function go(t){ if(!TABS.includes(t)) t='home'; $('#gearBtn').setAttribute('aria-pressed',t==='settings'||t==='guide'); if(t==='home') renderHome(); if(t==='settings') renderSettings(); document.querySelectorAll('[data-tab]').forEach(p=>p.hidden=p.dataset.tab!==t); document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.go===t)); try{ history.replaceState(null,'','#'+t); }catch{} window.scrollTo(0,0); }
+const TABS=['home','colours','due','litters','herd','health','settings','guide','plans'];
+function go(t){ if(!TABS.includes(t)) t='home'; $('#gearBtn').setAttribute('aria-pressed',t==='settings'||t==='guide'||t==='plans'); if(t==='plans') renderPlans(); if(t==='home') renderHome(); if(t==='settings') renderSettings(); document.querySelectorAll('[data-tab]').forEach(p=>p.hidden=p.dataset.tab!==t); document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.go===t)); try{ history.replaceState(null,'','#'+t); }catch{} window.scrollTo(0,0); }
 document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
 
 /* ===================== colours tab ===================== */
@@ -2719,14 +2752,116 @@ function renderSettings(){
   const sb=$('#setBreed'); if(!sb.options.length){ sb.innerHTML=$('#breedSel').innerHTML; sb.addEventListener('change',()=>{ const [sp,b]=sb.value.split(':'); setSpecies(sp,b); toast(`Switched to ${SPECIES[sp].BMAP[b].name}`); renderSettings(); }); }
   sb.value=`${SP.id}:${BR.id}`;
   const v=vetInfo(); $('#setVetTxt').textContent = v&&(v.phone||v.ooh) ? [v.name,v.phone,v.ooh&&('out of hours '+v.ooh)].filter(Boolean).join(' · ') : 'Not added yet';
+  $('#setProTxt').textContent = !Pro.on ? 'Available in the app at hutchmate.app.' : Pro.user ? `${PLAN_NAME[Pro.user.plan]||'Free'} · ${Pro.user.email}` : 'Free plan. Sign in to use a gift code or cloud backup.';
   $('#setStore').textContent = Store.mode==='db' ? 'Saved online and shared with anyone you give edit access.' : 'Saved on this device only. Use a backup to move it.';
   const H=Store.data.herd, Lt=Store.data.litters;
   $('#setCounts').textContent = `${H.length} animal${H.length===1?'':'s'}, ${Lt.length} litter${Lt.length===1?'':'s'} and ${Store.data.health.length} health record${Store.data.health.length===1?'':'s'} across all species.`;
 }
 $('#setAnim').addEventListener('change',e=>{ Settings.anim=e.target.checked; saveSettings(); toast(e.target.checked?'Litter animation on':'Litter animation off'); });
 $('#setVet').addEventListener('click',()=>{ go('health'); setTimeout(()=>{ const b=$('#vetCard button'); if(b) b.click(); },50); });
-$('#gearBtn').addEventListener('click',()=>{ const cur=(location.hash||'').slice(1); go(cur==='settings'||cur==='guide'?'home':'settings'); });
+$('#gearBtn').addEventListener('click',()=>{ const cur=(location.hash||'').slice(1); go(cur==='settings'||cur==='guide'||cur==='plans'?'home':'settings'); });
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-goto]'); if(b) go(b.dataset.goto); });
+
+/* ===================== Hutchmate Pro: accounts, plans, cloud backup ===================== */
+const PRICES = {monthly:'£2.99', annual:'£19.99', lifetime:'£39'};
+const Pro = {
+  base: (()=>{ if(window.Capacitor) return 'https://hutchmate.app'; const h=location.hostname; return (location.protocol.startsWith('http') && (/(^|\.)hutchmate\.app$/.test(h)||/\.workers\.dev$/.test(h)||h==='localhost'||h==='127.0.0.1')) ? '' : null; })(),
+  token: (()=>{ try{ return localStorage.getItem('lopkit_auth')||''; }catch{ return ''; } })(),
+  user: (()=>{ try{ return JSON.parse(localStorage.getItem('lopkit_user')||'null'); }catch{ return null; } })(),
+  last: (()=>{ try{ return +localStorage.getItem('lopkit_cloud')||0; }catch{ return 0; } })(),
+  timer: null, busy:false,
+  get on(){ return this.base!==null; },
+  get pro(){ return !!this.user?.pro; },
+  save(){ try{ localStorage.setItem('lopkit_auth',this.token||''); localStorage.setItem('lopkit_user',JSON.stringify(this.user)); }catch{} },
+  async api(path, method='GET', body){
+    let r; try{ r=await fetch(this.base+'/api/'+path,{method,headers:{...(body?{'Content-Type':'application/json'}:{}),...(this.token?{Authorization:'Bearer '+this.token}:{})},body:body?JSON.stringify(body):undefined,cache:'no-store'}); }
+    catch{ throw new Error('Couldn’t reach Hutchmate. Check your connection.'); }
+    const j=await r.json().catch(()=>({}));
+    if(r.status===401 && this.token && path!=='login'){ this.token=''; this.user=null; this.save(); }
+    if(!r.ok) throw new Error(j.error||'Something went wrong. Please try again.');
+    return j;
+  },
+  async refresh(){ if(!this.on||!this.token) return; try{ this.user=(await this.api('me')).user; this.save(); }catch{} if(!$('#p-plans').hidden) renderPlans(); if(!$('#p-settings').hidden) renderSettings(); },
+  schedule(){ if(!this.on||!this.pro||Settings.autoCloud===false) return; clearTimeout(this.timer); this.timer=setTimeout(()=>this.backup(false),20000); },
+  async backup(manual){
+    if(!this.on||!this.pro||this.busy) return; this.busy=true;
+    try{ const r=await this.api('sync','PUT',{data:{app:'hutchmate',v:1,herd:Store.data.herd,litters:Store.data.litters,health:Store.data.health,config:Store.data.config}});
+      this.last=r.updated; try{ localStorage.setItem('lopkit_cloud',String(r.updated)); }catch{} if(manual) toast('Backed up to the cloud'); }
+    catch(e){ if(manual) toast(e.message); }
+    this.busy=false; if(!$('#p-plans').hidden) renderPlans();
+  },
+  async restore(){
+    try{ const r=await this.api('sync'); if(!r.data){ toast('There’s no cloud backup yet.'); return; }
+      let n=0; for(const c of ['herd','litters','health','config']) for(const x of (Array.isArray(r.data[c])?r.data[c]:[])){ if(!x||typeof x!=='object'||!x.id||Store.data[c].some(y=>y.id===x.id)) continue; Store.data[c].push(x); n++; }
+      for(const c of ['herd','litters','health','config']) try{ localStorage.setItem(lsKey(c),JSON.stringify(Store.data[c])); }catch{}
+      renderData(); toast(n?`Restored ${n} record${n===1?'':'s'} from the cloud`:'Everything in the cloud backup is already on this device');
+    }catch(e){ toast(e.message); }
+  },
+};
+const fmtDT = ms => new Date(ms).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+const PLAN_NAME = {free:'Free',monthly:'Pro Monthly',annual:'Pro Annual',lifetime:'Pro Lifetime'};
+function renderPlans(){
+  $('#proUnavailable').hidden=Pro.on; $('#proBody').hidden=!Pro.on; if(!Pro.on) return;
+  const u=Pro.user, acc=$('#proAccount'); acc.innerHTML='';
+  if(u){
+    const out=el('button',{class:'sm ghost',onclick:async()=>{ try{ await Pro.api('logout','POST',{}); }catch{} Pro.token=''; Pro.user=null; Pro.save(); renderPlans(); toast('Signed out'); }},'Sign out');
+    acc.append(el('div',{class:'vetrow'},el('div',{},el('div',{class:'small muted'},'Signed in as'),el('b',{style:'overflow-wrap:anywhere'},u.email)),out),
+      el('div',{class:'pills',style:'margin-top:8px'},el('span',{class:'pill '+(u.pro?'p-monitor':'p-plain')},PLAN_NAME[u.plan]||'Free'), u.planUntil?el('span',{class:'pill p-plain'},`until ${fmtDY(new Date(u.planUntil))}`):null, u.admin?el('span',{class:'pill p-soon'},'Owner'):null));
+  } else {
+    let mode='login'; const eI=el('input',{type:'email',placeholder:'Email',autocomplete:'email'}), pI=el('input',{type:'password',placeholder:'Password (8 or more characters)',autocomplete:'current-password'});
+    const btn=el('button',{class:'primary'},'Sign in'), sw=el('button',{class:'ghost sm'},'New here? Create an account'), h=el('h3',{},'Sign in');
+    const set=()=>{ h.textContent=mode==='login'?'Sign in':'Create an account'; btn.textContent=mode==='login'?'Sign in':'Create account'; sw.textContent=mode==='login'?'New here? Create an account':'Already have an account? Sign in'; pI.autocomplete=mode==='login'?'current-password':'new-password'; };
+    sw.addEventListener('click',()=>{ mode=mode==='login'?'register':'login'; set(); });
+    btn.addEventListener('click',async()=>{ btn.disabled=true; try{ const r=await Pro.api(mode,'POST',{email:eI.value,password:pI.value}); Pro.token=r.token; Pro.user=r.user; Pro.save(); toast(mode==='login'?'Signed in':'Account created'); renderPlans(); }catch(e){ toast(e.message); } btn.disabled=false; });
+    acc.append(h,el('div',{class:'panel',style:'gap:8px'},eI,pI,el('div',{class:'actions'},btn,sw)),el('div',{class:'small muted',style:'margin-top:8px'},'An account is only needed for Pro. Your records stay on this device unless you turn on cloud backup. Keep your password safe: there is no automatic reset yet.'));
+  }
+  const cur=u?.plan||'free', T=$('#proTiers'); T.innerHTML='';
+  const tier=(k,name,price,per,desc,best)=>el('div',{class:'tier'+(cur===k?' cur':'')}, best?el('span',{class:'pill p-monitor badge'},best):null, el('div',{class:'tn'},name), el('div',{class:'tp'},price,per?el('small',{},' '+per):null), el('div',{class:'td'},desc),
+    cur===k?el('span',{class:'pill p-plain',style:'align-self:flex-start'},'Your plan'): k==='free'?null:el('button',{class:'sm',disabled:true},'Coming soon'));
+  T.append(tier('free','Free','£0','','Calculator, colour guide, Breed for, Identify, due dates, herd, litters and health check.'),
+    tier('monthly','Monthly',PRICES.monthly,'/ month','All Pro features. Cancel any time.'),
+    tier('annual','Annual',PRICES.annual,'/ year','All Pro features, about 45% less than paying monthly.','Best value'),
+    tier('lifetime','Lifetime',PRICES.lifetime,'once','All Pro features for good. No subscription.'));
+  T.append(el('div',{class:'card',style:'grid-column:1/-1'},el('h3',{},'What Pro includes'),el('ul',{class:'feat'},el('li',{},el('b',{},'Cloud backup'),' – your herd, litters and health log saved to your account and restored on any device. Available now.'),el('li',{class:'muted'},'Printable pedigree certificates, reminders, a multi-generation breeding planner and AI photo colour checks are planned.')),el('div',{class:'small muted',style:'margin-top:8px'},'Paying online isn’t switched on yet. If you’ve been given a gift code, enter it below.')));
+  const R=$('#proRedeem'); R.innerHTML='';
+  if(u && !u.pro || u && u.plan!=='lifetime'){ const cI=el('input',{placeholder:'HM-XXXX-XXXX-XXXX',autocapitalize:'characters'}); R.hidden=false;
+    R.append(el('h3',{},'Have a gift code?'),el('div',{class:'row'},cI,el('button',{class:'primary',style:'flex:0 0 auto',onclick:async()=>{ try{ const r=await Pro.api('redeem','POST',{code:cI.value}); Pro.user=r.user; Pro.save(); toast(`Code accepted: you now have ${PLAN_NAME[r.user.plan]}`); renderPlans(); }catch(e){ toast(e.message); } }},'Redeem'))); }
+  else if(!u){ R.hidden=false; R.append(el('h3',{},'Have a gift code?'),el('div',{class:'small muted'},'Sign in or create an account first, then enter your code here.')); }
+  else R.hidden=true;
+  const Cc=$('#proCloud'); Cc.innerHTML=''; Cc.hidden=!Pro.pro;
+  if(Pro.pro){ const sw=el('input',{type:'checkbox',class:'switch','aria-label':'Back up automatically'}); sw.checked=Settings.autoCloud!==false; sw.addEventListener('change',()=>{ Settings.autoCloud=sw.checked; saveSettings(); if(sw.checked) Pro.schedule(); });
+    Cc.append(el('h3',{},'Cloud backup'),el('div',{class:'small muted'},Pro.last?`Last backed up ${fmtDT(Pro.last)}.`:'Not backed up from this device yet.'),
+      el('div',{class:'setrow'},el('div',{},el('b',{},'Back up automatically'),el('div',{class:'small muted'},'Shortly after you change anything.')),sw),
+      el('div',{class:'actions',style:'margin-top:6px'},el('button',{class:'primary sm',onclick:()=>Pro.backup(true)},'Back up now'),el('button',{class:'sm',onclick:()=>Pro.restore()},'Restore from cloud')),
+      el('div',{class:'small muted',style:'margin-top:8px'},'Restore adds anything missing on this device; it never deletes or overwrites what’s already here.')); }
+  renderProAdmin();
+  if(u && !u.admin){ const del=el('button',{class:'ghost sm danger'},'Delete my account'); confirmArm(del,'Tap again to delete account and cloud backup',async()=>{ try{ await Pro.api('account','DELETE'); Pro.token=''; Pro.user=null; Pro.save(); renderPlans(); toast('Account deleted. Records on this device are kept.'); }catch(e){ toast(e.message); } }); acc.append(el('div',{style:'margin-top:10px'},del)); }
+}
+async function renderProAdmin(){
+  const A=$('#proAdmin'); A.hidden=!Pro.user?.admin; if(A.hidden) return; A.innerHTML='';
+  const pS=el('select',{'aria-label':'Plan'}); for(const [k,l] of [['lifetime','Lifetime'],['annual','1 year'],['monthly','1 month']]) pS.append(el('option',{value:k},l));
+  const nI=el('input',{type:'number',min:'1',max:'50',value:'1',inputmode:'numeric','aria-label':'How many'}), noteI=el('input',{placeholder:'Who is it for? (optional)'}), outBox=el('div',{class:'panel',style:'gap:6px;margin-top:8px'});
+  const copy=async t=>{ try{ await navigator.clipboard.writeText(t); toast('Copied'); }catch{ toast(t); } };
+  const gen=el('button',{class:'primary',onclick:async()=>{ try{ const r=await Pro.api('admin/codes','POST',{plan:pS.value,count:nI.value,note:noteI.value}); outBox.innerHTML=''; for(const c of r.codes) outBox.append(el('div',{class:'codebox'},c,el('button',{class:'sm',onclick:()=>copy(c)},'Copy'))); loadLists(); }catch(e){ toast(e.message); } }},'Create gift code');
+  const eI=el('input',{type:'email',placeholder:'Their account email'}), gS=el('select',{'aria-label':'Plan to give'}); for(const k of ['lifetime','annual','monthly','free']) gS.append(el('option',{value:k},PLAN_NAME[k]));
+  const grant=el('button',{onclick:async()=>{ try{ await Pro.api('admin/plan','POST',{email:eI.value,plan:gS.value}); toast('Plan updated'); eI.value=''; loadLists(); }catch(e){ toast(e.message); } }},'Set plan');
+  const codesBox=el('div'), usersBox=el('div');
+  A.append(el('h3',{},'Owner tools'),el('div',{class:'small muted',style:'margin-bottom:8px'},'Only you can see this.'),
+    el('b',{},'Gift codes'),el('div',{class:'row',style:'margin-top:6px'},el('label',{class:'f'},'Gives',pS),el('label',{class:'f'},'How many',nI)),el('div',{style:'margin-top:8px'},noteI),el('div',{class:'actions',style:'margin-top:8px'},gen),outBox,
+    el('details',{style:'margin-top:12px'},el('summary',{},'All gift codes'),codesBox),
+    el('div',{style:'margin-top:14px'},el('b',{},'Give a plan to an existing account')),el('div',{class:'row',style:'margin-top:6px'},eI,gS),el('div',{class:'actions',style:'margin-top:8px'},grant),
+    el('details',{style:'margin-top:12px'},el('summary',{},'All accounts'),usersBox));
+  async function loadLists(){
+    try{ const [c,us]=await Promise.all([Pro.api('admin/codes'),Pro.api('admin/users')]);
+      codesBox.innerHTML=''; if(!c.codes.length) codesBox.append(el('div',{class:'small muted',style:'margin-top:6px'},'No codes yet.'));
+      for(const x of c.codes){ const rm=el('button',{class:'ghost sm danger'},'Cancel'); confirmArm(rm,'Tap again',async()=>{ try{ await Pro.api('admin/codes?code='+encodeURIComponent(x.code),'DELETE'); loadLists(); }catch(e){ toast(e.message); } });
+        codesBox.append(el('div',{class:'urow'},el('div',{},el('div',{class:'mono'},x.code),el('div',{class:'small muted'},`${PLAN_NAME[x.plan]}${x.note?' · '+x.note:''} · ${x.used_by?'used by '+x.used_by:'not used yet'}`)), x.used_by?null:el('div',{class:'actions'},el('button',{class:'sm',onclick:()=>copy(x.code)},'Copy'),rm))); }
+      usersBox.innerHTML=''; for(const x of us.users) usersBox.append(el('div',{class:'urow'},el('div',{},el('div',{},x.email),el('div',{class:'small muted'},`${PLAN_NAME[x.plan]}${x.source?' · via '+x.source:''} · joined ${fmtDY(new Date(x.created))}`)), x.admin?el('span',{class:'pill p-soon'},'Owner'):null));
+    }catch(e){ codesBox.textContent=e.message; }
+  }
+  loadLists();
+}
+Pro.refresh();
 
 /* ===================== update check (phone app) ===================== */
 const APP_BUILD = 0; /*__APP_BUILD__*/
@@ -2818,6 +2953,7 @@ const GUIDE = [
  ['Due dates & litters',`<ul><li><b>Due</b>: enter the mating date to see the due date, the normal window and a full timeline from mating to new homes. Add the birth date to switch to the babies’ age.</li><li><b>Litters</b>: log each mating, then tap “Record birth” to add numbers born and alive. Overdue litters turn red.</li><li>Rabbits: 28–35 days (usually 31). Guinea pigs: 59–72 days (usually 63–68).</li></ul>`,[['Log a mating','litters']]],
  ['Health check',`<ol><li>If you see any <b>emergency sign</b>, tap it and ring your vet straight away.</li><li>Otherwise tap the body area and the signs you can see. The most likely causes appear with what to do now and how urgent it is.</li><li><b>Record this check</b> to save it to the animal’s health log, or <b>copy a summary</b> to send or read to your vet.</li><li>Mark checks resolved when they’re better. Routine daily, weekly and yearly checks are at the bottom.</li></ol><p>The checker is a guide to help you act quickly. It is not a diagnosis.</p>`,[['Open Health','health']]],
  ['Settings & display',`<p>Tap the gear at the top. Choose <b>System</b> (follows your phone), <b>Light</b>, <b>Dark</b>, <b>Night</b> (dim and warm for checking hutches in the dark) or <b>High contrast</b>. You can also make the text larger and switch off the litter animation. These settings are saved on each device.</p>`,[['Open settings','settings']]],
+ ['Hutchmate Pro & accounts',`<p>Everything in the app today is free. <b>Hutchmate Pro</b> adds extras, starting with <b>cloud backup</b>: your herd, litters and health log are saved to your account so you can restore them on any phone.</p><ol><li>Open <b>Settings → Hutchmate Pro</b> and create an account with your email and a password.</li><li>If you have a gift code, enter it under <b>Have a gift code?</b>.</li><li>With Pro, backups happen automatically, or tap <b>Back up now</b>. On a new phone, sign in and tap <b>Restore from cloud</b>.</li></ol><p>Paying online for monthly, annual or lifetime plans is coming later.</p>`,[['Open Hutchmate Pro','plans']]],
  ['Updating the phone app',`<p>The phone app checks for a newer version each time it opens. If there is one, an <b>Update available</b> banner appears on the Home page: tap <b>Download update</b>, open the downloaded file and install it over the top. Your animals and records are kept. You can also check in <b>Settings → App version</b>.</p>`,[['Open settings','settings']]],
  ['Saving, sharing & backups',`<p>In the web version your records are saved online and shared with anyone you give edit access. In the phone app they’re saved on the phone.</p><p>To move records between them, open <b>Settings → Backup</b>, tap <b>Copy backup</b>, then paste it into the other version and tap <b>Restore</b>. Records already there are kept.</p>`,[['Open backup','backup']]],
  ['Good to know',`<ul><li>Odds are per baby. Real litters vary, especially small ones.</li><li>The genetics cover the main colour, pattern and coat genes. Dutch markings, rufus, wideband shades and some rarer genes aren’t modelled.</li><li>Weights and breeding ages are rough guides; check your breed standard.</li><li>When in doubt about health, ring your vet.</li></ul>`,[]],
@@ -2825,7 +2961,7 @@ const GUIDE = [
 const GUIDE_GO = {
  'herd':()=>go('herd'), 'herd-add':()=>{ go('herd'); openHerdForm(null); }, 'vet':()=>$('#setVet').click(),
  'calc':()=>{ go('colours'); showColSub('calc'); }, 'sim':()=>{ go('colours'); showColSub('calc'); runSim(); }, 'guide-colours':()=>{ go('colours'); showColSub('guide'); },
- 'want':()=>{ go('colours'); showColSub('want'); }, 'identify':()=>{ go('colours'); showColSub('id'); }, 'litters':()=>go('litters'), 'health':()=>go('health'), 'settings':()=>go('settings'),
+ 'want':()=>{ go('colours'); showColSub('want'); }, 'identify':()=>{ go('colours'); showColSub('id'); }, 'litters':()=>go('litters'), 'health':()=>go('health'), 'settings':()=>go('settings'), 'plans':()=>go('plans'),
  'backup':()=>{ go('settings'); $('#backup').open=true; setTimeout(()=>$('#backup').scrollIntoView({block:'center'}),50); },
 };
 function renderGuidePage(){
