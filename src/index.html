@@ -70,7 +70,11 @@ header.top h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hbtns{flex:none}
 .brand{display:flex;align-items:center;gap:8px}
 .brand > div{min-width:0}
-.hlogo{width:34px;height:38px;flex:none}
+.hlogo{width:30px;height:34px;flex:none}
+header.top #hdrSub{display:none}
+header.top h1{overflow:visible;text-overflow:clip}
+#breedSel{flex:0 1 auto;min-width:0}
+.hbtns{flex:0 1 auto;min-width:0}
 #breedSel{flex:none;width:auto;max-width:34vw;font-weight:600;background:var(--accent-soft);color:var(--accent);border-color:transparent}
 h2{font-family:var(--display);font-weight:400;font-size:1.25rem;margin:0 0 4px;text-wrap:balance}
 h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px;font-weight:700}
@@ -379,7 +383,8 @@ a.call.ooh{background:var(--danger)}
 .kitc{position:relative;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:8px 8px 10px;text-align:center;opacity:0;transform:scale(.4)}
 .kitc.in{animation:kitpop .55s cubic-bezier(.3,1.6,.5,1) forwards}
 @keyframes kitpop{to{opacity:1;transform:scale(1)}}
-.kitc svg{width:100%;height:auto}
+.kitc svg{width:100%;height:auto;filter:drop-shadow(0 0 1.5px rgba(255,255,255,.75))}
+.sp .sv svg{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.75))}
 .kitc .kn{font-weight:700;font-size:.86rem;line-height:1.2}
 .kitc .kt{font-size:.74rem;opacity:.8;margin-top:2px}
 .kitc .ks{font-size:.72rem;opacity:.65;margin-top:3px;font-family:var(--mono)}
@@ -661,6 +666,7 @@ a.call.ooh{background:var(--danger)}
     <h3>Help</h3>
     <div class="setrow"><div><b>User guide</b><div class="small muted">How every part of the app works.</div></div><button class="sm primary" data-goto="guide">Open</button></div>
     <div class="setrow"><div><b>App version</b><div class="small muted" id="updTxt"></div></div><button class="sm" id="updCheck">Check for updates</button></div>
+    <div class="setrow"><div><b>Privacy &amp; terms</b><div class="small"><a href="https://hutchmate.app/privacy.html" target="_blank" rel="noopener" style="color:var(--accent)">Privacy policy</a> · <a href="https://hutchmate.app/terms.html" target="_blank" rel="noopener" style="color:var(--accent)">Terms of use</a></div></div></div>
     <div class="setrow"><div><b>About</b><div class="small muted">Hutchmate · genetics, litters &amp; health for rabbits and guinea pigs. Genetics and health information are a guide only; always check with your vet and breed club.</div></div></div>
   </div>
 </section>
@@ -2816,7 +2822,7 @@ function renderPlans(){
     const set=()=>{ h.textContent=mode==='login'?'Sign in':'Create an account'; btn.textContent=mode==='login'?'Sign in':'Create account'; sw.textContent=mode==='login'?'New here? Create an account':'Already have an account? Sign in'; pI.autocomplete=mode==='login'?'current-password':'new-password'; };
     sw.addEventListener('click',()=>{ mode=mode==='login'?'register':'login'; set(); });
     btn.addEventListener('click',async()=>{ btn.disabled=true; try{ const r=await Pro.api(mode,'POST',{email:eI.value,password:pI.value}); Pro.token=r.token; Pro.user=r.user; Pro.save(); toast(mode==='login'?'Signed in':'Account created'); renderPlans(); }catch(e){ toast(e.message); } btn.disabled=false; });
-    acc.append(h,el('div',{class:'panel',style:'gap:8px'},eI,pI,el('div',{class:'actions'},btn,sw)),el('div',{class:'small muted',style:'margin-top:8px'},'An account is only needed for Pro. Your records stay on this device unless you turn on cloud backup. Keep your password safe: there is no automatic reset yet.'));
+    acc.append(h,el('div',{class:'panel',style:'gap:8px'},eI,pI,el('div',{class:'actions'},btn,sw)),el('div',{class:'small muted',style:'margin-top:8px'},'An account is only needed for Pro. Your records stay on this device unless you turn on cloud backup. Keep your password safe: there is no automatic reset yet.'),el('div',{class:'small muted',style:'margin-top:6px',html:'By creating an account you agree to the <a href="https://hutchmate.app/terms.html" target="_blank" rel="noopener" style="color:var(--accent)">terms</a> and <a href="https://hutchmate.app/privacy.html" target="_blank" rel="noopener" style="color:var(--accent)">privacy policy</a>.'}));
   }
   const cur=u?.plan||'free', T=$('#proTiers'); T.innerHTML='';
   const tier=(k,name,price,per,desc,best)=>el('div',{class:'tier'+(cur===k?' cur':'')}, best?el('span',{class:'pill p-monitor badge'},best):null, el('div',{class:'tn'},name), el('div',{class:'tp'},price,per?el('small',{},' '+per):null), el('div',{class:'td'},desc),

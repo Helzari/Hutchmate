@@ -35,6 +35,7 @@ self.addEventListener('fetch',e=>{ const r=e.request; if(r.method!=='GET' || new
   e.respondWith(fetch(r).then(res=>{ if(res.ok){ const cp=res.clone(); caches.open(C).then(c=>c.put(r,cp)); } return res; }).catch(()=>caches.match(r,{ignoreSearch:true}).then(m=>m||caches.match('./')))); });
 `);
 fs.writeFileSync(path.join(out,'index.html'),html);
+for(const f of fs.readdirSync('src/pages')) fs.copyFileSync(path.join('src/pages',f), path.join(out,f));
 
 // Website build only (not inside the APK build): host the latest APK and its build number,
 // so the phone app can check hutchmate.app for updates.
