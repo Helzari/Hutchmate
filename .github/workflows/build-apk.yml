@@ -13,6 +13,14 @@ jobs:
     env:
       HAS_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 != '' }}
     steps:
+      # Every published APK is signed with Hutchmate's private release key, kept only in GitHub secrets.
+      # Without that key nothing is published: a debug key is public, so anyone could sign a fake update with it.
+      - name: Check the release signing key is set
+        if: env.HAS_KEYSTORE != 'true'
+        run: |
+          echo "::error::Add the KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS and KEY_PASSWORD secrets (Settings > Secrets and variables > Actions), then re-run this workflow."
+          exit 1
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -33,43 +41,7 @@ jobs:
           npm run build:web
           npx cap sync android
 
-      - name: Build debug APK (install straight onto a phone)
-        working-directory: android
-        env:
-          VERSION_CODE: ${{ github.run_number }}
-          VERSION_NAME: 1.0.${{ github.run_number }}
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: hutchmate-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Publish APK to the "latest" release (phone-friendly download link)
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk Hutchmate.apk
-          gh release delete latest --yes --cleanup-tag || true
-          gh release create latest Hutchmate.apk --target "${{ github.sha }}" \
-            --title "Hutchmate (latest build)" \
-            --notes "Build ${{ github.run_number }}. On an Android phone, tap Hutchmate.apk below, then open it and allow installing from this source. Installing over an older version keeps your data."
-
-      - name: Tell the website a new build is ready (Cloudflare rebuilds and hosts the new APK)
-        run: |
-          echo '{"build": ${{ github.run_number }}}' > site-version.json
-          git config user.name "hutchmate-bot"
-          git config user.email "hutchmate-bot@users.noreply.github.com"
-          git add site-version.json
-          git commit -m "Website: publish APK build ${{ github.run_number }}" || exit 0
-          git pull --rebase origin main && git push origin HEAD:main
-
-      # ---- Optional: signed release for Google Play. Runs only once the KEYSTORE_BASE64 secret exists. ----
-      - name: Build signed release (Play Store bundle + APK)
-        if: env.HAS_KEYSTORE == 'true'
+      - name: Build signed release (APK for phones + bundle for Google Play)
         working-directory: android
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -79,15 +51,37 @@ jobs:
           VERSION_CODE: ${{ github.run_number }}
           VERSION_NAME: 1.0.${{ github.run_number }}
         run: |
+          chmod +x gradlew
           echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
           export KEYSTORE_FILE="$RUNNER_TEMP/release.jks"
-          ./gradlew bundleRelease assembleRelease --no-daemon
+          ./gradlew assembleRelease bundleRelease --no-daemon
+          rm -f "$RUNNER_TEMP/release.jks"
 
       - name: Upload signed release
-        if: env.HAS_KEYSTORE == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: hutchmate-release
           path: |
-            android/app/build/outputs/bundle/release/app-release.aab
             android/app/build/outputs/apk/release/app-release.apk
+            android/app/build/outputs/bundle/release/app-release.aab
+
+      - name: Publish APK to the "latest" release (phone-friendly download link)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk Hutchmate.apk
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest Hutchmate.apk --target "${{ github.sha }}" \
+            --title "Hutchmate (latest build)" \
+            --notes "Build ${{ github.run_number }}. On an Android phone, tap Hutchmate.apk below, then open it and allow installing from this source. Installing over an older version keeps your data.
+
+          Have build 16 or earlier installed? Those used a different signing key, so this one can't install over them. In the app, open Storage and tap Copy backup, paste it somewhere safe, uninstall Hutchmate, install this APK, then use Restore from pasted text."
+
+      - name: Tell the website a new build is ready (Cloudflare rebuilds and hosts the new APK)
+        run: |
+          echo '{"build": ${{ github.run_number }}}' > site-version.json
+          git config user.name "hutchmate-bot"
+          git config user.email "hutchmate-bot@users.noreply.github.com"
+          git add site-version.json
+          git commit -m "Website: publish APK build ${{ github.run_number }}" || exit 0
+          git pull --rebase origin main && git push origin HEAD:main
