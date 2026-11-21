@@ -43,8 +43,8 @@ Hutchmate is a guide, not a guarantee. The genetics cover the main colour, patte
 
 The whole app is one page, `src/index.html`. `npm run build:web` copies it into `www/` with offline fonts, a web-app manifest and a service worker; [Capacitor](https://capacitorjs.com) wraps that as the Android app (`uk.helzari.hutchmate`).
 
-- **APK:** every push to `main` runs `.github/workflows/build-apk.yml`, which builds the APK and publishes it to the rolling [`latest` release](https://github.com/Helzari/hutchmate/releases/latest).
+- **APK:** every push to `main` runs `.github/workflows/build-apk.yml`, which builds a release APK signed with the private Hutchmate key and publishes it to the rolling [`latest` release](https://github.com/Helzari/hutchmate/releases/latest). It needs the secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` and `KEY_PASSWORD`; without them the workflow stops and publishes nothing.
 - **Website:** Cloudflare builds with `npm run build:web` and deploys `www/` using `wrangler.jsonc`. The build also bundles the latest APK; if this repository is private, set a `GITHUB_TOKEN` build secret in Cloudflare (fine-grained token, Contents: read-only).
-- **Google Play (optional):** add the secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` and `KEY_PASSWORD` and the workflow also produces a signed `app-release.aab`. Never commit your release keystore.
+- **Google Play:** the same run also produces a signed `app-release.aab` (in the run's `hutchmate-release` artifact) to upload as the Play upload key. Never commit a keystore, release or debug.
 
 © Helzari. All rights reserved.
